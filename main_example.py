@@ -2,8 +2,7 @@ import os
 from AmatsukamiLogger import logger, initialize
 import warnings
 
-os.environ['COMMIT_HASH'] = 'some_hash'
-initialize(enable_datadog=False, log_level="DEBUG", service_name="ll_exmaple")
+initialize(False, log_level="DEBUG", service_name="logger_example")
 
 warnings.warn("Warning test")
 
@@ -13,12 +12,6 @@ with logger.contextualize(path="Music", request_id="07f33010-77a5-11ec-ac21-ae1d
     logger.info("I`m info with str extra field", contact_id="Noa Kirel")
     logger.warning("I`m warn with extra dict:", some_dict={"numbers": [4, 8, 3]})
 
-initialize(log_to_stdout=True,
-           log_file_name="my_logs.log",
-           enable_datadog=True,
-           service_name="ll_exmaple",
-           local_logs_extra_types={'rotation': "1 MB"})
-
 logger.error("I`m error")
 logger.critical("I`m critical")
 logger.warning("This is a log with list and simple type:", is_exmaple=True, some_list=["a", "b", "c"])
@@ -27,6 +20,14 @@ try:
     raise Exception("Some Exception")
 except Exception as exc:
     logger.exception(exc)
+
+os.environ['COMMIT_HASH'] = 'some_hash'
+initialize(log_to_stdout=True,
+           log_file_name="my_logs.log",
+           enable_json_logging=True,
+           enable_datadog_support=False,
+           service_name="logger_example",
+           local_logs_extra_types={'rotation': "1 MB"})
 
 try:
     raise Exception("Some Exception")
@@ -43,7 +44,7 @@ except Exception as exc2:
                      dict1={"numbers": [4, 8, 3]},
                      dict2={"strings": "Hello"})
 
-
+initialize(False, log_level="DEBUG", service_name="logger_example")
 @logger.catch
 def logger_catch_decorator_example(x, y, z):
     # An error? It's caught anyway!

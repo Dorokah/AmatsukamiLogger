@@ -5,8 +5,8 @@ import traceback
 
 class BaseLogger:
     def __init__(self, redirect_3rd_party_loggers: bool = True):
-        self.hostname = socket.gethostname()
-        self.redirect_3rd_party_loggers = redirect_3rd_party_loggers
+        self._hostname = socket.gethostname()
+        self._redirect_3rd_party_loggers = redirect_3rd_party_loggers
 
     @abc.abstractmethod
     def log_format(self, record):
@@ -17,7 +17,7 @@ class BaseLogger:
         pass
 
     def lineup_external_log_record(self, record):
-        if self.redirect_3rd_party_loggers and 'logger_name' in record['extra']:
+        if self._redirect_3rd_party_loggers and 'logger_name' in record['extra']:
             record['module'] = record['extra'].pop('module')
             record['line'] = record['extra'].pop('line')
         return record

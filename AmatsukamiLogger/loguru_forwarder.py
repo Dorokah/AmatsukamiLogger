@@ -2,7 +2,7 @@ import logging
 import sys
 import warnings
 from pathlib import Path
-from loguru import logger
+from AmatsukamiLogger import logger
 
 
 class LoguruForwarder(logging.Handler):

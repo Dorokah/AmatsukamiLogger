@@ -3,11 +3,9 @@ import os
 import sys
 import warnings
 from typing import Literal
-
 from loguru import logger
-
-from local_logs_handler import LocalLogsHandler
-from loguru_forwarder import showwarning, LoguruForwarder
+from AmatsukamiLogger.local_logs_handler import LocalLogsHandler
+from AmatsukamiLogger.loguru_forwarder import showwarning, LoguruForwarder
 
 from AmatsukamiLogger.json_logs_handler import JsonLogsHandler
 
@@ -70,7 +68,7 @@ def initialize(enable_json_logging: bool = os.getenv('AL_ENABLE_JSON_LOGGING', "
         logs_handler = JsonLogsHandler(service_name, enable_datadog_support, redirect_3rd_party_loggers)
     else:
         logs_handler = LocalLogsHandler(service_name, local_logs_extra_types,
-                                             redirect_3rd_party_loggers)
+                                        redirect_3rd_party_loggers)
 
     if log_to_stdout:
         logger.add(sys.stderr, colorize=enable_colors, serialize=False, format=logs_handler.log_format,

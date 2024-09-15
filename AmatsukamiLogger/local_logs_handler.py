@@ -1,7 +1,7 @@
 import os
 import subprocess
 import orjson
-from base_logger import BaseLogger
+from AmatsukamiLogger.base_logger import BaseLogger
 
 
 class LocalLogsHandler(BaseLogger):
@@ -21,12 +21,12 @@ class LocalLogsHandler(BaseLogger):
           flag used to redirect all loggers handlers that being used to loguru logger (default is True)
         """
         super().__init__(redirect_3rd_party_loggers)
-        self.short_hash = self._get_git_revision_short_hash()
+        self.short_hash = self._get_git_revision_short_hash
         self.allowed_extra_fields_types = local_logs_extra_types or [int, float, bool]
         self._base_log_fields = ["|<level>{level}</level>",
                                  "| <level>{time:YYYY-MM-DD HH:mm:ss:SSS}</level>",
                                  f" |<level>{self.short_hash}</level>",
-                                 f"| <level>{self.hostname}</level> ",
+                                 f"| <level>{self._hostname}</level> ",
                                  f"| <level>{service_name}</level>",
                                  " | <level>{module}:{line}</level>"]
 
@@ -87,6 +87,7 @@ class LocalLogsHandler(BaseLogger):
                 local_log_field.append("<level>{extra[json_extra]}</level>\n")
 
 
+    @property
     def _get_git_revision_short_hash(self) -> str:
         if commit_hash := os.environ.get("COMMIT_HASH"):
             return commit_hash
