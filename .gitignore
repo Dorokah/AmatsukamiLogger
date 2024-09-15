@@ -1,0 +1,17 @@
+venv/
+vagrant_files/.vagrant
+.idea/
+*.pyc
+*.log
+*.log.*
+build/
+dist/
+*.egg-info/
+.env
+*.whl
+**/.pytest_cache/
+**/cov_html/
+.pypirc
+.DS_Store
+reports
+test/.pytest_cache
