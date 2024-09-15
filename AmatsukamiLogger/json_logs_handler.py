@@ -10,25 +10,17 @@ class JsonLogsHandler(BaseLogger):
                  redirect_3rd_party_loggers: bool = True):
         """ Creates A logger config log handler, suitable for K8S ENVs.
             You Must Have a COMMIT_HASH environment variable set to the commit hash
-        Parameters
-        ----------
-        service_name : str,
-          field which will be in every log (default is "unnamed_service")
-        enable_datadog_support : bool
-          when enabled Datadog tags will be added, used for correlation between logs and metrics.
-        redirect_3rd_party_loggers : bool,
-          flag used to redirect all loggers handlers that being used to loguru logger (default is True)
         """
         self.short_hash = self._get_git_revision_short_hash()
         self.service_name = service_name
         self.enable_datadog_support = enable_datadog_support
-        if enable_datadog_support:
+        if self.enable_datadog_support:
             import ddtrace
-            from ddtrace import tracer
+            self.tracer = ddtrace.tracer
+            self.dd_config = ddtrace.config
         super().__init__(redirect_3rd_party_loggers)
 
-    @staticmethod
-    def _get_git_revision_short_hash():
+    def _get_git_revision_short_hash(self):
         return os.environ["COMMIT_HASH"]
 
     def log_format(self, record):
@@ -43,21 +35,20 @@ class JsonLogsHandler(BaseLogger):
             "utf-8")
         return "{extra[serialized]}"
 
-    @staticmethod
-    def add_datadog_tags(log_fields):
-        span = tracer.current_span()
+    def add_datadog_tags(self, log_fields):
+        span = self.tracer.current_span() if self.enable_datadog_support else None
         trace_id, span_id = (span.trace_id, span.span_id) if span else (None, None)
         log_fields.update({
             'dd.trace_id': str(trace_id or 0),
             'dd.span_id': str(span_id or 0),
-            'dd.env': ddtrace.config.env or "",
-            'dd.service': ddtrace.config.service or "",
-            'dd.version': ddtrace.config.version or ""
+            'dd.env': self.dd_config.env or "",
+            'dd.service': self.dd_config.service or "",
+            'dd.version': self.dd_config.version or ""
         })
 
     def _get_base_log_fields(self, record):
         level = record["level"].name
-        if record["level"].no == 25:
+        if self.enable_datadog_support and record["level"].no == 25:  # Datadog do not support SUCCESS LEVEL (25 is SUCCESS)
             level = 'INFO'
         log_fields = {
             "line": record["line"],
