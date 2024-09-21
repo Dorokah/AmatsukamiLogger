@@ -36,7 +36,4 @@ jobs:
       run: uv build
       
     - name: Publish to PyPI (via Trusted Publisher)
-      run: uvx twine upload dist/*
-      env:
-        PYPI_USERNAME: dorokah  # This is a placeholder but not used
-        PYPI_PASSWORD: ${{ secrets.pypi_token }}  # Not needed if using Trusted Publisher, but required for older methods
+      run: uvx twine upload dist/* --username dorokah --password ${{ secrets.pypi_token }}
