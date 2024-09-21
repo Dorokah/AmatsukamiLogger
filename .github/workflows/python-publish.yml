@@ -44,8 +44,10 @@ jobs:
     - name: Build package
       run: uv build
       
-    - name: Publish package
-      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
+    - name: Publish to PyPI (via Trusted Publisher)
+      run: |
+        pip install twine
+        python -m twine upload --repository pypi dist/*
+      env:
+        PYPI_USERNAME: __token__  # This is a placeholder but not used
+        PYPI_PASSWORD: ${{ secrets.PYPI_API_KEY }}  # Not needed if using Trusted Publisher, but required for older methods
