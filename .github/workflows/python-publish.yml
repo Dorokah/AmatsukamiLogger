@@ -39,4 +39,3 @@ jobs:
       run: |
         pip install twine
         python -m twine upload --repository pypi dist/*
-      env:
