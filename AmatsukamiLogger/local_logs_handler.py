@@ -7,14 +7,14 @@ from AmatsukamiLogger.base_logger import BaseLogger
 class LocalLogsHandler(BaseLogger):
     def __init__(self,
                  service_name: str = "unnamed_service",
-                 local_logs_extra_types: [type] = None,
-                 redirect_3rd_party_loggers: bool = True):
+                 local_logs_extra_types: list[type] | None = None,
+                 redirect_3rd_party_loggers: bool = True) -> None:
         """ Creates A config log handler, suitable for local ENVs.
         Parameters
         ----------
         service_name : str,
           field which will be in every log (default is "unnamed_service")
-        local_logs_extra_types : [type],
+        local_logs_extra_types : list[type] | None,
           list of logs fields types which will be added to the first line in the log if possible
           (default is [int, float, bool]) plus str which does not have \n in them and their length do not pass 40 chars
         redirect_3rd_party_loggers : bool,
@@ -30,7 +30,7 @@ class LocalLogsHandler(BaseLogger):
                                  f"| <level>{service_name}</level>",
                                  " | <level>{module}:{line}</level>"]
 
-    def log_format(self, record):
+    def log_format(self, record) -> str:
         record = self.lineup_external_log_record(record)
         local_log_field = self._base_log_fields.copy()
         self._add_const_fields(local_log_field, record)
@@ -38,19 +38,14 @@ class LocalLogsHandler(BaseLogger):
         self._add_pretty_print_extra_fields(local_log_field, record)
         return "".join(local_log_field)
 
-    def _add_const_fields(self, local_log_field, record):
-        simple_extra_fields_names = self._get_allowed_extra_fields(record)
-        for field in simple_extra_fields_names:
+    def _add_const_fields(self, local_log_field: list, record) -> None:
+        for field in self._get_allowed_extra_fields(record):
             local_log_field.append(f" | <m>{field}:{record['extra'].pop(field)}</m>")
 
     def _get_allowed_extra_fields(self, record) -> set:
-        simple_extra_fields = set()
-        for field, value in record["extra"].items():
-            if type(value) in self.allowed_extra_fields_types:
-                simple_extra_fields.add(field)
         return {field for field, value in record["extra"].items() if self._is_allowed_local_extra_field(field, value)}
 
-    def _is_allowed_local_extra_field(self, field, value) -> bool:
+    def _is_allowed_local_extra_field(self, field: str, value) -> bool:
         if field[0] == '_':
             return False
         if type(value) in self.allowed_extra_fields_types:
@@ -59,7 +54,7 @@ class LocalLogsHandler(BaseLogger):
             return True
         return False
 
-    def _handle_message_formating(self, local_log_field, record):
+    def _handle_message_formating(self, local_log_field: list, record) -> None:
         if exception := record["exception"]:
             record["extra"]["traceback"] = self._get_traceback()
             local_log_field[0] = "|<RED><normal><b>EXCEPTION</b></normal></RED>"
@@ -70,7 +65,7 @@ class LocalLogsHandler(BaseLogger):
             local_log_field.append("\n<level>{message}</level>\n")
 
     @staticmethod
-    def _add_pretty_print_extra_fields(local_log_field, record):
+    def _add_pretty_print_extra_fields(local_log_field: list, record) -> None:
         if extra := record["extra"]:
             if extra.get("traceback"):
                 no_traceback_extra = extra.copy()
@@ -85,7 +80,6 @@ class LocalLogsHandler(BaseLogger):
                                                              option=orjson.OPT_INDENT_2 |
                                                                     orjson.OPT_SORT_KEYS).decode('utf-8')
                 local_log_field.append("<level>{extra[json_extra]}</level>\n")
-
 
     @property
     def _get_git_revision_short_hash(self) -> str:

@@ -2,12 +2,12 @@ import logging
 import sys
 import warnings
 from pathlib import Path
-from AmatsukamiLogger import logger
+from loguru import logger
 
 
 class LoguruForwarder(logging.Handler):
     # noinspection PyUnresolvedReferences,PyProtectedMember
-    def emit(self, record):
+    def emit(self, record: logging.LogRecord) -> None:
         # Get corresponding Loguru level if it exists.
         message = f"[{record.name}] {record.getMessage()}"
         try:
@@ -24,7 +24,7 @@ class LoguruForwarder(logging.Handler):
         logger.opt(depth=depth, exception=record.exc_info).log(level, message)
 
 
-def showwarning(message, category, filename, lineno, file=None, line=None):
+def showwarning(message, category, filename, lineno, file=None, line=None) -> None:
     path = Path(filename)
     extracted_external_logs_fields = {
         'module': path.stem,
