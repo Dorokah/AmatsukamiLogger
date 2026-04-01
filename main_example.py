@@ -2,7 +2,7 @@ import os
 from AmatsukamiLogger import logger, initialize
 import warnings
 
-initialize(False, log_level="DEBUG", service_name="logger_example")
+initialize(enable_json_logging=False, log_level="DEBUG", service_name="logger_example")
 
 warnings.warn("Warning test")
 
@@ -21,13 +21,10 @@ try:
 except Exception as exc:
     logger.exception(exc)
 
-os.environ['COMMIT_HASH'] = 'some_hash'
 initialize(log_to_stdout=True,
            log_file_name="my_logs.log",
            enable_json_logging=True,
-           enable_datadog_support=False,
-           service_name="logger_example",
-           local_logs_extra_types={'rotation': "1 MB"})
+           service_name="logger_example")
 
 try:
     raise Exception("Some Exception")
@@ -40,11 +37,13 @@ except Exception as exc2:
     logger.exception(str(exc2),
                      request_id="another_request",
                      pokemon_id="Pikachu",
-                     person_id="23132161891161515616116516515615157615785",  # this is longer then 40 chars
+                     person_id="23132161891161515616116516515615157615785",  # longer than 40 chars
                      dict1={"numbers": [4, 8, 3]},
                      dict2={"strings": "Hello"})
 
-initialize(False, log_level="DEBUG", service_name="logger_example")
+initialize(enable_json_logging=False, log_level="DEBUG", service_name="logger_example")
+
+
 @logger.catch
 def logger_catch_decorator_example(x, y, z):
     # An error? It's caught anyway!
